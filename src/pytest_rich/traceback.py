@@ -1,14 +1,13 @@
 import ast
 import sys
 from typing import Dict
-from typing import Optional
 from typing import Sequence
 
-import attr
 from _pytest._code.code import ExceptionChainRepr
 from _pytest._code.code import ReprEntry
 from _pytest._code.code import ReprFileLocation
 from _pytest._code.code import ReprFuncArgs
+from attrs import define
 from pygments.token import Comment
 from pygments.token import Keyword
 from pygments.token import Name
@@ -34,7 +33,7 @@ from rich.theme import Theme
 from rich.traceback import PathHighlighter
 
 
-@attr.s(auto_attribs=True)
+@define
 class RichExceptionChainRepr:
     """
     A rich representation of an ExceptionChainRepr produced by pytest.
@@ -46,7 +45,7 @@ class RichExceptionChainRepr:
     nodeid: str
     chain: ExceptionChainRepr
     extra_lines: int = 3
-    theme: Optional[str] = "ansi_dark"
+    theme: str = "ansi_dark"
     word_wrap: bool = True
     indent_guides: bool = True
     error_messages: list = []
