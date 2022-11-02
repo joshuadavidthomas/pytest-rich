@@ -60,6 +60,14 @@ class RichTerminalReporter:
         self.total_duration += report.duration
 
     def pytest_collection(self) -> None:
+        """
+        Called at the beginning of the collection process, to perform any
+        collection for a session.
+
+        Hook type: Collection
+
+        [Pytest docs](https://docs.pytest.org/en/latest/reference/reference.html#pytest.hookspec.pytest_collection)
+        """
         self.collect_progress = Progress(
             "[progress.description]{task.description}",
         )
@@ -67,6 +75,13 @@ class RichTerminalReporter:
         self.collect_progress.start()
 
     def pytest_collectreport(self, report: pytest.CollectReport) -> None:
+        """
+        Called after a Collector has finished collecting.
+
+        Hook type: Reporting
+
+        [Pytest docs](https://docs.pytest.org/en/latest/reference/reference.html#pytest.hookspec.pytest_collectreport)
+        """
         items = [x for x in report.result if isinstance(x, pytest.Item)]
         if items:
             for item in items:
@@ -82,6 +97,13 @@ class RichTerminalReporter:
                 )
 
     def pytest_collection_finish(self, session: pytest.Session) -> None:
+        """
+        Called after collection has been performed and modified.
+
+        Hook type: Collection
+
+        [Pytest docs](https://docs.pytest.org/en/latest/reference/reference.html#pytest.hookspec.pytest_collection_finish)
+        """
         if self.collect_progress is not None:
             self.collect_progress.update(
                 self.collect_task,
@@ -92,11 +114,25 @@ class RichTerminalReporter:
             self.collect_progress = None
 
     def pytest_sessionstart(self, session: pytest.Session) -> None:
+        """
+        Called after the Session object has been created and before performing collection and entering the run test loop.
+
+        Hook type: Initialization
+
+        [Pytest docs](https://docs.pytest.org/en/latest/reference/reference.html#pytest.hookspec.pytest_sessionstart)
+        """
         header = generate_header_panel(session)
 
         self.console.print(header)
 
     def pytest_internalerror(self, excrepr: ExceptionRepr) -> None:
+        """
+        Called when an internal error occurs.
+
+        Hook type: Debugging / Interaction
+
+        [Pytest docs](https://docs.pytest.org/en/latest/reference/reference.html#pytest.hookspec.pytest_internalerror)
+        """
         ...
 
     def pytest_warning_recorded(
@@ -104,17 +140,45 @@ class RichTerminalReporter:
         warning_message: warnings.WarningMessage,
         nodeid: str,
     ) -> None:
+        """
+        Called by the internal Pytest warning system to process a warning.
+
+        Hook type: Reporting
+
+        [Pytest docs](https://docs.pytest.org/en/latest/reference/reference.html#pytest.hookspec.pytest_warning_recorded)
+        """
         ...
 
     def pytest_deselected(self, items: Sequence[pytest.Item]) -> None:
+        """
+        Called when test items are deselected.
+
+        Hook type: Reporting
+
+        [Pytest docs](https://docs.pytest.org/en/latest/reference/reference.html#pytest.hookspec.pytest_deselected)
+        """
         ...
 
     def pytest_plugin_registered(self, plugin) -> None:
+        """
+        Called when a new plugin is registered.
+
+        Hook type: Initialization
+
+        [Pytest docs](https://docs.pytest.org/en/latest/reference/reference.html#pytest.hookspec.pytest_plugin_registered)
+        """
         ...
 
     def pytest_runtest_logstart(
         self, nodeid: str, location: Tuple[str, Optional[int], str]
     ) -> None:
+        """
+        Called before running a single test item.
+
+        Hook type: Test Running
+
+        [Pytest docs](https://docs.pytest.org/en/latest/reference/reference.html#pytest.hookspec.pytest_runtest_logstart)
+        """
         if self.runtest_progress is None:
             self.runtest_progress = Progress(SpinnerColumn(), "{task.description}")
             self.runtest_progress.start()
@@ -174,6 +238,13 @@ class RichTerminalReporter:
             )
 
     def pytest_runtest_logreport(self, report: pytest.TestReport) -> None:
+        """
+        Called after the setup, call, and teardown phases of a test run for each test item.
+
+        Hook type: Test Running
+
+        [Pytest docs](https://docs.pytest.org/en/latest/reference/reference.html#pytest.hookspec.pytest_runtest_logreport)
+        """
         status: Optional[RichTerminalReporter.Status] = None
         if report.when == "setup":
             status = "running"
@@ -185,6 +256,13 @@ class RichTerminalReporter:
             self._update_task(report.nodeid)
 
     def pytest_runtest_logfinish(self) -> None:
+        """
+        Called after running a single test item.
+
+        Hook type: Test Running
+
+        [Pytest docs](https://docs.pytest.org/en/latest/reference/reference.html#pytest.hookspec.pytest_runtest_logfinish)
+        """
         self.total_items_completed += 1
         percent = (self.total_items_completed * 100) // self.total_items_collected
         if self.runtest_progress is not None:
@@ -196,6 +274,13 @@ class RichTerminalReporter:
     def pytest_sessionfinish(
         self, session: pytest.Session, exitstatus: Union[int, pytest.ExitCode]
     ):
+        """
+        Called after the whole test run finishes, before returning the exit status to the system.
+
+        Hook type: Initialization
+
+        [Pytest docs](https://docs.pytest.org/en/latest/reference/reference.html#pytest.hookspec.pytest_sessionfinish)
+        """
         error_messages = {}
         if self.runtest_progress is not None:
             self.runtest_progress.stop()
@@ -292,7 +377,21 @@ class RichTerminalReporter:
     def pytest_keyboard_interrupt(
         self, excinfo: pytest.ExceptionInfo[BaseException]
     ) -> None:
+        """
+        Called when a keyboard interrupt is caught.
+
+        Hook type: Debugging / Interaction
+
+        [Pytest docs](https://docs.pytest.org/en/latest/reference/reference.html#pytest.hookspec.pytest_keyboard_interrupt)
+        """
         ...
 
     def pytest_unconfigure(self) -> None:
+        """
+        Called after all other hooks before test process is exited.
+
+        Hook type: Initialization
+
+        [Pytest docs](https://docs.pytest.org/en/latest/reference/reference.html#pytest.hookspec.pytest_unconfigure)
+        """
         ...
